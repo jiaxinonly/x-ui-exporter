@@ -16,12 +16,12 @@ app = Flask(__name__)
 
 # 创建指标
 registry = CollectorRegistry()
-all_flow = Gauge("all_flow", "x-ui总流量", registry=registry)
-all_up_flow = Gauge("all_up_flow", "x-ui总上传流量", registry=registry)
-all_down_flow = Gauge("all_down_flow", "x-ui总下载流量", registry=registry)
-user_all_flow = Gauge("user_all_flow", "用户总流量", labelnames=['id', 'name', 'protocol'], registry=registry)
-user_up_flow = Gauge("user_up_flow", "用户上传流量", labelnames=['id', 'name', 'protocol'], registry=registry)
-user_down_flow = Gauge("user_down_flow", "用户下载流量", labelnames=['id', 'name', 'protocol'], registry=registry)
+x_ui_all_flow_bytes = Gauge("all_flow", "x-ui总流量", registry=registry)
+x_ui_all_up_flow_bytes = Gauge("all_up_flow", "x-ui总上传流量", registry=registry)
+x_ui_all_down_flow_bytes = Gauge("all_down_flow", "x-ui总下载流量", registry=registry)
+x_ui_user_all_flow_bytes = Gauge("user_all_flow", "用户总流量", labelnames=['id', 'name', 'protocol'], registry=registry)
+x_ui_user_up_flow_bytes = Gauge("user_up_flow", "用户上传流量", labelnames=['id', 'name', 'protocol'], registry=registry)
+x_ui_user_down_flow_bytes = Gauge("user_down_flow", "用户下载流量", labelnames=['id', 'name', 'protocol'], registry=registry)
 
 
 # 身份验证装饰器
