@@ -37,6 +37,23 @@ def requires_auth(f):
     return decorated
 
 
+@app.route('/')
+@requires_auth
+def main():
+    html = """
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>x-ui exporter</title>
+</head>
+<body>
+    <h1>x-ui exporter</h1>
+    <p><a href="./metrics">Metrics</a></p>
+</body>
+</html>"""
+    return html
+
 @app.route('/metrics')
 @requires_auth
 def metrics():  # put application's code here
