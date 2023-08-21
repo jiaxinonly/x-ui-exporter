@@ -69,12 +69,12 @@ def metrics():  # put application's code here
         all_down += user[3]
 
         # 设置用户指标值
-        user_up_flow.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2])
-        user_down_flow.labels(id=user[0], name=user[5], protocol=user[10]).set(user[3])
-        user_all_flow.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2] + user[3])
-    all_flow.set(all_up + all_down)
-    all_up_flow.set(all_up)
-    all_down_flow.set(all_down)
+        x_ui_user_up_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2])
+        x_ui_user_down_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[3])
+        x_ui_user_all_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2] + user[3])
+    x_ui_all_flow_bytes.set(all_up + all_down)
+    x_ui_all_up_flow_bytes.set(all_up)
+    x_ui_all_down_flow_bytes.set(all_down)
     text = generate_latest(registry)
     return Response(text, mimetype='text/plain')
 
