@@ -4,6 +4,8 @@ from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.vpc.v20170312 import vpc_client, models
+from lib.dingding_notice import send_dingding_msg
+from datetime import datetime
 
 SecretId = ""
 SecretKey = ""
@@ -41,14 +43,19 @@ def get_txy_share_flow_packet():
         resp = json.loads(resp.to_json_string())
         all_remaining_amount = 0
         all_used_amount = 0
+        deadline_flag = False
         for package in resp['TrafficPackageSet']:
             all_remaining_amount += package['RemainingAmount']
             all_used_amount += package['UsedAmount']
+            deadline = datetime.strptime(package['Deadline'], '%Y-%m-%dT%H:%M:%SZ')
+            if (deadline - datetime.today()).days < 15:
+                deadline_flag = True
         all_total_amount = all_remaining_amount + all_used_amount
         data = {"AllTotalAmount": all_total_amount, "AllRemainingAmount": all_remaining_amount,
                 "AllUsedAmount": all_used_amount, 'TrafficPackageSet': resp['TrafficPackageSet']}
+        if all_remaining_amount <= 10 or deadline_flag or resp['TotalCount'] == 0:
+            send_dingding_msg(data)
         return data
-
 
     except TencentCloudSDKException as err:
         print(err)

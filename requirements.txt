@@ -1,2 +1,3 @@
-Flask==2.3.2
+dingtalkchatbot==1.5.7
+Flask==2.3.3
 prometheus_client==0.17.1

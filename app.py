@@ -2,6 +2,7 @@ from flask import Flask, Response, request
 from prometheus_client import generate_latest, Gauge, CollectorRegistry
 from functools import wraps
 from lib.flow_packet import get_txy_share_flow_packet
+import sqlite3
 
 # 数据库地址
 DB_PATH = "/etc/x-ui/x-ui.db"
@@ -27,7 +28,8 @@ x_ui_user_down_flow_bytes = Gauge("x_ui_user_down_flow_bytes", "x-ui用户下载
                                   labelnames=['id', 'name', 'protocol'], registry=registry)
 txy_all_flow_packet_total_amount_Gbytes = Gauge("txy_all_flow_packet_total_amount_Gbytes", "腾讯云所有共享流量包总量",
                                                 registry=registry)
-txy_all_flow_packet_remaining_amount_Gbytes = Gauge("txy_all_flow_packet_remaining_amount_Gbytes", "腾讯云所有共享流量包剩余量",
+txy_all_flow_packet_remaining_amount_Gbytes = Gauge("txy_all_flow_packet_remaining_amount_Gbytes",
+                                                    "腾讯云所有共享流量包剩余量",
                                                     registry=registry)
 txy_all_flow_packet_used_amount_Gbytes = Gauge("txy_all_flow_packet_used_amount_Gbytes", "腾讯云所有共享流量包使用量",
                                                registry=registry)
@@ -73,24 +75,24 @@ def main():
 @app.route('/metrics')
 @requires_auth
 def metrics():  # put application's code here
-    # connect = sqlite3.connect(DB_PATH)
-    # cursor = connect.cursor()
-    # cursor.execute("select * from inbounds")
-    # data = cursor.fetchall()
-    # all_up = 0
-    # all_down = 0
-    # for user in data:
-    #     # 统计总上传下载流量
-    #     all_up += user[2]
-    #     all_down += user[3]
-    #
-    #     # 设置用户指标值
-    #     x_ui_user_up_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2])
-    #     x_ui_user_down_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[3])
-    #     x_ui_user_all_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2] + user[3])
-    # x_ui_all_flow_bytes.set(all_up + all_down)
-    # x_ui_all_up_flow_bytes.set(all_up)
-    # x_ui_all_down_flow_bytes.set(all_down)
+    connect = sqlite3.connect(DB_PATH)
+    cursor = connect.cursor()
+    cursor.execute("select * from inbounds")
+    data = cursor.fetchall()
+    all_up = 0
+    all_down = 0
+    for user in data:
+        # 统计总上传下载流量
+        all_up += user[2]
+        all_down += user[3]
+
+        # 设置用户指标值
+        x_ui_user_up_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2])
+        x_ui_user_down_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[3])
+        x_ui_user_all_flow_bytes.labels(id=user[0], name=user[5], protocol=user[10]).set(user[2] + user[3])
+    x_ui_all_flow_bytes.set(all_up + all_down)
+    x_ui_all_up_flow_bytes.set(all_up)
+    x_ui_all_down_flow_bytes.set(all_down)
 
     # 添加腾讯云共享流量包指标
     data = get_txy_share_flow_packet()
@@ -100,10 +102,11 @@ def metrics():  # put application's code here
     for package in data['TrafficPackageSet']:
         txy_flow_packet_total_amount_Gbytes.labels(id=package['TrafficPackageId'], name=package['TrafficPackageName'],
                                                    type=package['DeductType']).set(package['TotalAmount'])
-        txy_flow_packet_remaining_amount_Gbytes.labels(id=package['TrafficPackageId'], name=package['TrafficPackageName'],
-                                                   type=package['DeductType']).set(package['RemainingAmount'])
+        txy_flow_packet_remaining_amount_Gbytes.labels(id=package['TrafficPackageId'],
+                                                       name=package['TrafficPackageName'],
+                                                       type=package['DeductType']).set(package['RemainingAmount'])
         txy_flow_packet_used_amount_Gbytes.labels(id=package['TrafficPackageId'], name=package['TrafficPackageName'],
-                                                   type=package['DeductType']).set(package['UsedAmount'])
+                                                  type=package['DeductType']).set(package['UsedAmount'])
 
     text = generate_latest(registry)
     return Response(text, mimetype='text/plain')
