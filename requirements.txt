@@ -1,3 +1,4 @@
-dingtalkchatbot==1.5.7
-Flask==2.3.3
-prometheus_client==0.17.1
+dingtalkchatbot
+Flask
+prometheus_client
+tencentcloud-sdk-python-vpc
